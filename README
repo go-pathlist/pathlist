@@ -1,0 +1,14 @@
+Package pathlist manipulates lists of filepaths joined by the OS-specific
+ListSeparator (pathlists), usually found in PATH or GOPATH environment
+variables.
+It complements the functionality of the standard path/filepath package with:
+ - creating a pathlist from individual filepaths (New)
+ - extending a pathlist with an individual filepath (AppendTo/PrependTo)
+
+Further information:
+
+Docs:       https://godoc.org/gopkg.in/pathlist.v0
+CI/Linux:   https://travis-ci.org/go-pathlist/pathlist
+CI/Windows: https://ci.appveyor.com/project/speter/pathlist
+
+Author's other projects: https://speter.net/
