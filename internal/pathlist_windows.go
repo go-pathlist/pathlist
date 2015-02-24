@@ -10,7 +10,7 @@ import (
 
 func NewElem(filepath string) (string, error) {
 	if strings.ContainsRune(filepath, '"') {
-		return "", Error{Cause_: ErrQuote, Filepath: filepath}
+		return "", Error{Cause_: ErrQuote, Filepath_: filepath}
 	}
 	if strings.ContainsRune(filepath, ListSeparator) {
 		return `"` + filepath + `"`, nil
