@@ -2,8 +2,8 @@ Package pathlist manipulates lists of filepaths joined by the OS-specific
 ListSeparator (pathlists), usually found in PATH or GOPATH environment
 variables.
 It complements the functionality of the standard path/filepath package with:
- - creating a pathlist from individual filepaths (New)
- - extending a pathlist with an individual filepath (AppendTo/PrependTo)
+ - New: create a pathlist from individual filepaths.
+ - AppendTo/PrependTo: extend a pathlist with an individual filepath.
 
 Further information:
 

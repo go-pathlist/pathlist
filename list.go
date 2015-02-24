@@ -6,28 +6,26 @@
 // ListSeparator (pathlists), usually found in PATH or GOPATH environment
 // variables.
 // It complements the functionality of the standard path/filepath package with:
-//  - creating a pathlist from individual filepaths (New)
-//  - extending a pathlist with an individual filepath (AppendTo/PrependTo)
+//  - New: create a pathlist from individual filepaths.
+//  - AppendTo/PrependTo: extend a pathlist with an individual filepath.
 //
 // Pathlist handles the quoting/unquoting of filepaths as required on Windows.
-// Moreover, the design of the package aims to help prevent some common mistakes
-// with pathlist manipulation that can lead to unexpected behavior and/or
-// security issues stemming from mixing individual filepaths and pathlists.
-// Specifically, a naive implementation filepath would have the following
-// problems, both potentially leading to security issues:
-//  - NaiveJoin("", "/mybin") on Unix would return ":/mybin" which will search
+// The package uses two separate types to make the context of string parameters
+// (single/list, quoted/unquoted) explicit:
+//  - string: individual OS-native raw (unquoted) filepath
+//  - List:   path list in OS-specific format (potentially quoted on Windows)
+//
+// This also helps prevent some common mistakes with pathlist manipulation that
+// can lead to unexpected behavior and security issues.
+// Specifically, a naive implementation could have the following problems:
+//  - NaiveJoin("", "/mybin") on Unix would return ":/mybin", which would search
 //    the working directory before /mybin, even if "" was meant to represent the
-//    empty pathlist
+//    empty pathlist.
 //  - NaiveJoin("/mnt/C:/tmp/bin", os.Getenv("PATH")) on Unix would prepend two
 //    directories "/mnt/C" and "/tmp/bin" to PATH, even if the argument was
-//    meant to represent the single filepath "/mnt/C:/tmp/bin"
+//    meant to represent the single filepath "/mnt/C:/tmp/bin".
 //
-// The pathlist package prevents such issues by using two different types to
-// distinguish between the meanings:
-//  string: individual OS-native raw (unquoted) filepath.
-//  List:   path list in OS-specific format (potentially quoted on Windows)
-//
-// In addition, filepath (string) arguments are validated.
+// In addition to using distinct types, filepath arguments are validated.
 // On Unix, filepaths containing the separator (':') cannot be used as part of a
 // List; these trigger an Error with Cause returning ErrSep.
 // On Windows, raw (unquoted) filepaths must be used; an Error with Cause
@@ -37,15 +35,15 @@
 //
 // Using this package, the two examples above can be written as:
 //  pathlist.AppendTo("", "/mybin") // returns "/mybin", nil
-//  pathlist.PrependTo(pathlist.OsPath(), "/mnt/C:/tmp/bin") // error
+//  pathlist.PrependTo(pathlist.OsPath(), "/mnt/C:/tmp/bin") // returns ErrSep
 //
 // Note that even though the error handling API is common across platforms, the
 // behavior is somewhat asymmetric.
 // On Unix, ':' is generally a valid (although uncommon) character in filepaths,
-// so an error typically indicates input error.
+// so an error typically indicates input error and the user should be notified.
 // In contrast, on Windows all filepaths can be included in a list; an error
-// generally indicates the caller mixing quoted and unquoted paths, which is
-// likely a bug.
+// generally means that the caller is mixing quoted and unquoted paths, which
+// likely indicates a bug and that the implementation should be fixed.
 package pathlist // import "gopkg.in/pathlist.v0"
 
 import (
