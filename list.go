@@ -55,7 +55,7 @@ import (
 
 // ErrSep and ErrQuote are returned by Error.Cause.
 const (
-	ErrSep   = "filepath must not contain the separator" // Unix only
+	ErrSep   = "filepath must not contain ListSeparator" // Unix only
 	ErrQuote = "filepath must not be quoted"             // Windows only
 )
 
