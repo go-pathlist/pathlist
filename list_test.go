@@ -187,3 +187,29 @@ func testAppendToCase(t *testing.T, target appendToTestTarget,
 			target.name, list, filepath, appended)
 	}
 }
+
+func TestAppendToCloseQuote(t *testing.T) {
+	if runtime.GOOS != "windows" {
+		t.Skip("windows-only test")
+	}
+	l := List(`a"a`)
+	fp := "b"
+	{ // AppendTo
+		want := List(`a"a":b`)
+		got, err := AppendTo(l, fp)
+		if err != nil || got != want {
+			t.Errorf("fail: AppendTo(%#q, %q) = %#q, %v, want %#q, nil", l, fp, got, err, want)
+		} else {
+			t.Logf("pass: AppendTo(%#q, %q) = %#q, %v", l, fp, got, err)
+		}
+	}
+	{ // PrependTo
+		want := List(`b:a"a"`)
+		got, err := PrependTo(l, fp)
+		if err != nil || got != want {
+			t.Errorf("fail: PrependTo(%#q, %q) = %#q, %v, want %#q, nil", l, fp, got, err, want)
+		} else {
+			t.Logf("pass: PrependTo(%#q, %q) = %#q, %v", l, fp, got, err)
+		}
+	}
+}

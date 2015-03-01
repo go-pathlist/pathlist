@@ -4,6 +4,11 @@
 
 package internal
 
-func NewElem(filepath string) (string, error) {
-	return filepath, nil
+func NewElem(fp string) (string, error) {
+	return fp, nil
+}
+
+func CloseQuote(el string) string {
+	// no quoting on Plan9
+	return el
 }

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func NewElem(filepath string) (string, error) {
+func NewElem(fp string) (string, error) {
 	if strings.ContainsRune(filepath, '"') {
 		return "", Error{Cause_: ErrQuote, Filepath_: filepath}
 	}
@@ -16,4 +16,12 @@ func NewElem(filepath string) (string, error) {
 		return `"` + filepath + `"`, nil
 	}
 	return filepath, nil
+}
+
+func CloseQuote(el string) string {
+	c := strings.Count(el, ListSeparator)
+	if c%2 != 0 {
+		return el + `"`
+	}
+	return el
 }

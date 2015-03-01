@@ -6,7 +6,13 @@
 
 // Package internal implements internal logic for the pathlist package.
 //
-// TODO(speter): sane behavior on lists/elems containing unclosed quotes
+// Parameter names refer to "type":
+//  fp: filepath (single, raw/unquoted)
+//  l:  list (0 or more elems, potentially quoted)
+//  e:  elem (single, potentially quoted)
+//  el: e or l
+//
+// TODO(speter): sane behavior on elems containing unclosed quotes
 package internal
 
 import (
@@ -68,6 +74,7 @@ func Filepaths(l string) []string {
 }
 
 func Append(l, e string) string {
+	l = CloseQuote(l)
 	if (l == "" && e != "") || l == listsep ||
 		strings.HasSuffix(l, listsep2) {
 		return l + e
@@ -76,6 +83,7 @@ func Append(l, e string) string {
 }
 
 func Prepend(l, e string) string {
+	l = CloseQuote(l)
 	if (l == "" && e != "") || l == listsep ||
 		strings.HasPrefix(l, listsep2) {
 		return e + l

@@ -10,9 +10,14 @@ import (
 	"strings"
 )
 
-func NewElem(filepath string) (string, error) {
-	if strings.ContainsRune(filepath, ListSeparator) {
-		return "", Error{Cause_: ErrSep, Filepath_: filepath}
+func NewElem(fp string) (string, error) {
+	if strings.ContainsRune(fp, ListSeparator) {
+		return "", Error{Cause_: ErrSep, Filepath_: fp}
 	}
-	return filepath, nil
+	return fp, nil
+}
+
+func CloseQuote(el string) string {
+	// no quoting on Unix
+	return el
 }
