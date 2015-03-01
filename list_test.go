@@ -14,17 +14,22 @@ import (
 
 var _ Error = internal.Error{}
 
-func assertString(t *testing.T, expr, got, want string) {
-	if want != got {
-		t.Errorf("fail: %s: got %q, want %q", expr, got, want)
-	} else {
-		t.Logf("pass: %s: got %q", expr, got)
-	}
+var constTests = []struct {
+	exprStr, expr, want string
+}{
+	{exprStr: "ErrQuote", expr: ErrQuote, want: internal.ErrQuote},
+	{exprStr: "ErrSep", expr: ErrSep, want: internal.ErrSep},
 }
 
+// Ensure that error constants don't diverge.
 func TestConst(t *testing.T) {
-	assertString(t, "ErrQuote", ErrQuote, internal.ErrQuote)
-	assertString(t, "ErrSep", ErrSep, internal.ErrSep)
+	for _, tt := range constTests {
+		if tt.expr != tt.want {
+			t.Errorf("%s = %q; want %q", tt.exprStr, tt.expr, tt.want)
+		} else {
+			t.Logf("%s = %q", tt.exprStr, tt.expr)
+		}
+	}
 }
 
 func colonToSep(list List) List {
@@ -92,7 +97,7 @@ var newTestsWindows = []newTest{
 }
 
 func TestNew(t *testing.T) {
-	tests := append([]newTest{}, newTests...)
+	tests := newTests
 	switch runtime.GOOS {
 	case "darwin", "dragonfly", "freebsd", "linux", "netbsd", "openbsd",
 		"plan9", "solaris":
@@ -105,15 +110,15 @@ func TestNew(t *testing.T) {
 		l, err := New(tt.filepaths...)
 		switch {
 		case tt.ok && err != nil:
-			t.Errorf("fail: New(%q): got error %v, want %#q",
-				tt.filepaths, err, exp)
+			t.Errorf("New(%q) = %v, %v; want %#q, nil",
+				tt.filepaths, l, err, exp)
 		case !tt.ok && err == nil:
-			t.Errorf("fail: New(%q): got ok, want error", tt.filepaths)
+			t.Errorf("New(%q) = %#q, %v; want error", tt.filepaths, l, err)
 		case l != exp:
-			t.Errorf("fail: New(%q): got %#q, want %#q",
-				tt.filepaths, l, exp)
+			t.Errorf("New(%q) = %#q, %v; want %#q, nil",
+				tt.filepaths, l, err, exp)
 		default:
-			t.Logf("pass: New(%q): got %q, %v", tt.filepaths, l, err)
+			t.Logf("New(%q) = %q, %v", tt.filepaths, l, err)
 		}
 	}
 }
@@ -177,14 +182,14 @@ func testAppendToCase(t *testing.T, target appendToTestTarget,
 	appended, err := target.appnd(list, filepath)
 	switch {
 	case err != nil:
-		t.Errorf("fail: %s(%q, %q), got error %v, want equivalent to %q",
-			target.name, list, filepath, err, exp)
+		t.Errorf("%s(%q, %q) = %#q, %v; want equivalent to %q, nil",
+			target.name, list, filepath, appended, err, exp)
 	case !equiv(Split(exp), Split(appended)):
-		t.Errorf("fail: %s(%q, %q), got %q, want equivalent to %q",
-			target.name, list, filepath, appended, exp)
+		t.Errorf("%s(%q, %q) = %#q, %v; want equivalent to %q, nil",
+			target.name, list, filepath, appended, err, exp)
 	default:
-		t.Logf("pass: %s(%q, %q), got %q",
-			target.name, list, filepath, appended)
+		t.Logf("%s(%q, %q) = %#q, %v",
+			target.name, list, filepath, appended, err)
 	}
 }
 
@@ -198,18 +203,18 @@ func TestAppendToCloseQuote(t *testing.T) {
 		want := List(`a"a":b`)
 		got, err := AppendTo(l, fp)
 		if err != nil || got != want {
-			t.Errorf("fail: AppendTo(%#q, %q) = %#q, %v, want %#q, nil", l, fp, got, err, want)
+			t.Errorf("AppendTo(%#q, %q) = %#q, %v; want %#q, nil", l, fp, got, err, want)
 		} else {
-			t.Logf("pass: AppendTo(%#q, %q) = %#q, %v", l, fp, got, err)
+			t.Logf("AppendTo(%#q, %q) = %#q, %v", l, fp, got, err)
 		}
 	}
 	{ // PrependTo
 		want := List(`b:a"a"`)
 		got, err := PrependTo(l, fp)
 		if err != nil || got != want {
-			t.Errorf("fail: PrependTo(%#q, %q) = %#q, %v, want %#q, nil", l, fp, got, err, want)
+			t.Errorf("PrependTo(%#q, %q) = %#q, %v; want %#q, nil", l, fp, got, err, want)
 		} else {
-			t.Logf("pass: PrependTo(%#q, %q) = %#q, %v", l, fp, got, err)
+			t.Logf("PrependTo(%#q, %q) = %#q, %v", l, fp, got, err)
 		}
 	}
 }

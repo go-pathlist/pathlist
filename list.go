@@ -54,7 +54,7 @@ import (
 )
 
 // ErrSep and ErrQuote are returned by Error.Cause.
-const (
+const ( // replicated from internal to keep messages in godoc
 	ErrSep   = "filepath must not contain ListSeparator" // Unix only
 	ErrQuote = "filepath must not be quoted"             // Windows only
 )
