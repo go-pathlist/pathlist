@@ -9,17 +9,17 @@ import (
 )
 
 func NewElem(fp string) (string, error) {
-	if strings.ContainsRune(filepath, '"') {
-		return "", Error{Cause_: ErrQuote, Filepath_: filepath}
+	if strings.ContainsRune(fp, '"') {
+		return "", Error{Cause_: ErrQuote, Filepath_: fp}
 	}
-	if strings.ContainsRune(filepath, ListSeparator) {
-		return `"` + filepath + `"`, nil
+	if strings.ContainsRune(fp, ListSeparator) {
+		return `"` + fp + `"`, nil
 	}
-	return filepath, nil
+	return fp, nil
 }
 
 func CloseQuote(el string) string {
-	c := strings.Count(el, ListSeparator)
+	c := strings.Count(el, string(ListSeparator))
 	if c%2 != 0 {
 		return el + `"`
 	}
