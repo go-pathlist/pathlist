@@ -200,7 +200,7 @@ func TestAppendToCloseQuote(t *testing.T) {
 	l := List(`a"a`)
 	fp := "b"
 	{ // AppendTo
-		want := List(`a"a":b`)
+		want := List(`a"a";b`)
 		got, err := AppendTo(l, fp)
 		if err != nil || got != want {
 			t.Errorf("AppendTo(%#q, %q) = %#q, %v; want %#q, nil", l, fp, got, err, want)
@@ -209,7 +209,7 @@ func TestAppendToCloseQuote(t *testing.T) {
 		}
 	}
 	{ // PrependTo
-		want := List(`b:a"a"`)
+		want := List(`b;a"a"`)
 		got, err := PrependTo(l, fp)
 		if err != nil || got != want {
 			t.Errorf("PrependTo(%#q, %q) = %#q, %v; want %#q, nil", l, fp, got, err, want)

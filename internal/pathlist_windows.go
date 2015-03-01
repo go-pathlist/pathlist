@@ -19,7 +19,7 @@ func NewElem(fp string) (string, error) {
 }
 
 func CloseQuote(el string) string {
-	c := strings.Count(el, string(ListSeparator))
+	c := strings.Count(el, `"`)
 	if c%2 != 0 {
 		return el + `"`
 	}
