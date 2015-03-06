@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package pathlist
+package env
 
-const pathenv = "path"
+// VarPath is the OS (shell) specific executable search path variable name.
+const VarPath = "PATH"

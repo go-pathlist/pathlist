@@ -5,7 +5,10 @@
 // Package pathlist manipulates lists of filepaths joined by the OS-specific
 // ListSeparator (pathlists), usually found in PATH or GOPATH environment
 // variables.
-// It complements the functionality of the standard path/filepath package with:
+// See also package env ( https://godoc.org/gopkg.in/pathlist.v0/env ) for
+// helper functions and examples for using this package.
+//
+// The package complements the functionality of the standard path/filepath with:
 //  - New: create a pathlist from individual filepaths.
 //  - AppendTo/PrependTo: extend a pathlist with an individual filepath.
 //
@@ -99,13 +102,6 @@ func New(filepaths ...string) (List, error) {
 	}
 	return List(internal.NewList(elems...)), nil
 }
-
-// Gopath returns the value of the GOPATH environment variable as a List.
-func Gopath() List { return List(os.Getenv("GOPATH")) }
-
-// OsPath returns the value of the OS-specific executable path environment
-// variable as a List.
-func OsPath() List { return List(os.Getenv(pathenv)) }
 
 // Split returns the (raw/unquoted) filepaths contained in list.
 // Unlike strings.Split, Split returns an empty slice when passed an empty
