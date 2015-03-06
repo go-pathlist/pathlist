@@ -28,7 +28,7 @@ func SetPath(l pathlist.List) error {
 
 // Gopath gets the Go workspace path.
 func Gopath() pathlist.List {
-	return pathlist.List(os.Getenv(VarPath))
+	return pathlist.List(os.Getenv(VarGopath))
 }
 
 // SetGopath sets the Go workspace path.
