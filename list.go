@@ -38,7 +38,7 @@
 //
 // Using this package, the two examples above can be written as:
 //  pathlist.AppendTo("", "/mybin") // returns "/mybin", nil
-//  pathlist.PrependTo(pathlist.OsPath(), "/mnt/C:/tmp/bin") // returns ErrSep
+//  pathlist.PrependTo(env.Path(), "/mnt/C:/tmp/bin") // returns ErrSep
 //
 // Note that even though the error handling API is common across platforms, the
 // behavior is somewhat asymmetric.
