@@ -64,9 +64,6 @@ func NewList(e ...string) string {
 }
 
 func Filepaths(l string) []string {
-	if l == "" {
-		return nil
-	}
 	if l == listsep {
 		return []string{""}
 	}

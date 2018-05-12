@@ -36,14 +36,6 @@ func colonToSep(list List) List {
 	return List(strings.Replace(string(list), ":", string(ListSeparator), -1))
 }
 
-func colonToSepSlice(lists []List) []List {
-	ll := make([]List, len(lists))
-	for i, l := range lists {
-		ll[i] = colonToSep(l)
-	}
-	return ll
-}
-
 func equiv(l1, l2 []string) bool {
 	i1, i2 := 0, 0
 	for ; i1 < len(l1) && i2 < len(l2); i1, i2 = i1+1, i2+1 {
@@ -59,16 +51,6 @@ func equiv(l1, l2 []string) bool {
 		}
 	}
 	return i1 == len(l1) && i2 == len(l2)
-}
-
-func nop(b []byte) {
-}
-
-func reverse(b []byte) {
-	l := len(b)
-	for i := 0; i < l/2; i++ {
-		b[i], b[l-1-i] = b[l-1-i], b[i]
-	}
 }
 
 type newTest struct {
@@ -123,73 +105,81 @@ func TestNew(t *testing.T) {
 	}
 }
 
-type appendToTestTarget struct {
-	name    string
-	prepare func([]byte)
-	appnd   func(List, string) (List, error)
-}
-
-var appendToTestTargets = []appendToTestTarget{
-	{"AppendTo", nop, AppendTo},
-	{"PrependTo", reverse, PrependTo},
-}
-
 type appendToTest struct {
-	list     List
-	filepath string
-	appended List
+	list      List
+	filepaths []string
+	appended  List
+	prepended List
 }
 
 var appendToTests = []appendToTest{
-	{"", "", ":"},
-	{"", "c", "c"},
-	{"a", "", "a:"},
-	{"a", "c", "a:c"},
-	{":", "", ":"},
-	{":", "c", ":c"},
-	{"a:b", "", "a:b:"},
-	{"a:b", "c", "a:b:c"},
-	{"a:", "", "a:"},
-	{"a:", "c", "a::c"},
-	{":b", "", ":b:"},
-	{":b", "c", ":b:c"},
-	{"::", "", "::"},
-	{"::", "c", "::c"},
-	{"a::", "", "a::"},
-	{"a::", "c", "a::c"},
+	{"", []string{}, "", ""},
+	{"", []string{""}, ":", ":"},
+	{"", []string{"c"}, "c", "c"},
+	{"", []string{"c", "d"}, "c:d", "c:d"},
+	{"a", []string{}, "a", "a"},
+	{"a", []string{""}, "a:", ":a"},
+	{"a", []string{"c"}, "a:c", "c:a"},
+	{"a", []string{"c", "d"}, "a:c:d", "c:d:a"},
+	{":", []string{""}, ":", ":"},
+	{":", []string{"c"}, ":c", "c:"},
+	{":", []string{"c", "d"}, ":c:d", "c:d:"},
+	{"a:b", []string{}, "a:b", "a:b"},
+	{"a:b", []string{""}, "a:b:", ":a:b"},
+	{"a:b", []string{"c"}, "a:b:c", "c:a:b"},
+	{"a:b", []string{"c", "d"}, "a:b:c:d", "c:d:a:b"},
+	{"a:", []string{}, "a:", "a:"},
+	{"a:", []string{""}, "a:", ":a:"},
+	{"a:", []string{"c"}, "a::c", "c:a:"},
+	{"a:", []string{"c", "d"}, "a::c:d", "c:d:a:"},
+	{":b", []string{}, ":b", ":b"},
+	{":b", []string{""}, ":b:", ":b"},
+	{":b", []string{"c"}, ":b:c", "c::b"},
+	{":b", []string{"c", "d"}, ":b:c:d", "c:d::b"},
+	{"::", []string{}, "::", "::"},
+	{"::", []string{""}, "::", "::"},
+	{"::", []string{"c"}, "::c", "c::"},
+	{"::", []string{"c", "d"}, "::c:d", "c:d::"},
+	{"a::", []string{}, "a::", "a::"},
+	{"a::", []string{""}, "a::", ":a::"},
+	{"a::", []string{"c"}, "a::c", "c:a::"},
+	{"a::", []string{"c", "d"}, "a::c:d", "c:d:a::"},
+	{"::b", []string{}, "::b", "::b"},
+	{"::b", []string{""}, "::b:", "::b"},
+	{"::b", []string{"c"}, "::b:c", "c::b"},
+	{"::b", []string{"c", "d"}, "::b:c:d", "c:d::b"},
 }
 
 func TestAppendTo(t *testing.T) {
-	for _, target := range appendToTestTargets {
-		for _, tt := range appendToTests {
-			testAppendToCase(t, target, tt)
-		}
+	for _, tt := range appendToTests {
+		testAppendToCase(t, tt)
 	}
 }
 
-func testAppendToCase(t *testing.T, target appendToTestTarget,
-	tt appendToTest) {
-
-	listBytes := []byte(colonToSep(tt.list))
-	filepathBytes := []byte(tt.filepath)
-	expBytes := []byte(colonToSep(tt.appended))
-	target.prepare(listBytes)
-	target.prepare(filepathBytes)
-	target.prepare(expBytes)
-	list := List(listBytes)
-	filepath := string(filepathBytes)
-	exp := List(expBytes)
-	appended, err := target.appnd(list, filepath)
+func testAppendToCase(t *testing.T, tt appendToTest) {
+	appended, aerr := AppendTo(tt.list, tt.filepaths...)
 	switch {
-	case err != nil:
-		t.Errorf("%s(%q, %q) = %#q, %v; want equivalent to %q, nil",
-			target.name, list, filepath, appended, err, exp)
-	case !equiv(Split(exp), Split(appended)):
-		t.Errorf("%s(%q, %q) = %#q, %v; want equivalent to %q, nil",
-			target.name, list, filepath, appended, err, exp)
+	case aerr != nil:
+		t.Errorf("AppendTo(%q, %q) = %#q, %v; want equivalent to %q, nil",
+			tt.list, tt.filepaths, appended, aerr, tt.appended)
+	case !equiv(Split(tt.appended), Split(appended)):
+		t.Errorf("AppendTo(%q, %q) = %#q, %v; want equivalent to %q, nil",
+			tt.list, tt.filepaths, appended, aerr, tt.appended)
 	default:
-		t.Logf("%s(%q, %q) = %#q, %v",
-			target.name, list, filepath, appended, err)
+		t.Logf("AppendTo(%q, %q) = %#q, %v",
+			tt.list, tt.filepaths, appended, aerr)
+	}
+	prepended, perr := PrependTo(tt.list, tt.filepaths...)
+	switch {
+	case perr != nil:
+		t.Errorf("PrependTo(%q, %q) = %#q, %v; want equivalent to %q, nil",
+			tt.list, tt.filepaths, prepended, perr, tt.prepended)
+	case !equiv(Split(tt.prepended), Split(prepended)):
+		t.Errorf("PrependTo(%q, %q) = %#q, %v; want equivalent to %q, nil",
+			tt.list, tt.filepaths, prepended, perr, tt.prepended)
+	default:
+		t.Logf("PrependTo(%q, %q) = %#q, %v",
+			tt.list, tt.filepaths, prepended, perr)
 	}
 }
 
@@ -217,4 +207,56 @@ func TestAppendToCloseQuote(t *testing.T) {
 			t.Logf("PrependTo(%#q, %q) = %#q, %v", l, fp, got, err)
 		}
 	}
+}
+
+func TestAppendToInvalidFilepath(t *testing.T) {
+	if invalidFilepath == "" {
+		t.Skip("no invalid filepath on this OS")
+	}
+	{
+		got, err := AppendTo(colonToSep("a:b"), invalidFilepath)
+		if err == nil {
+			t.Errorf("AppendTo(%#q, %q) = %#q, %v, want error", colonToSep("a:b"),
+				invalidFilepath, got, err)
+		} else {
+			t.Logf("AppendTo(%#q, %q) = %#q, %v", colonToSep("a:b"),
+				invalidFilepath, got, err)
+		}
+	}
+	{
+		got, err := PrependTo(colonToSep("a:b"), invalidFilepath)
+		if err == nil {
+			t.Errorf("PrependTo(%#q, %q) = %#q, %v, want error", colonToSep("a:b"),
+				invalidFilepath, got, err)
+		} else {
+			t.Logf("PrependTo(%#q, %q) = %#q, %v", colonToSep("a:b"),
+				invalidFilepath, got, err)
+		}
+	}
+}
+
+func TestMustOK(t *testing.T) {
+	want := colonToSep("a:b:c")
+	got := Must(AppendTo(colonToSep("a:b"), "c"))
+	if equiv(Split(got), Split(want)) {
+		t.Logf("Must(AppendTo(%#q, %q)) = %#q", colonToSep("a:b"), "c", got)
+	} else {
+		t.Logf("Must(AppendTo(%#q, %q)) = %#q, want equivalent to %#q",
+			colonToSep("a:b"), "c", got, want)
+	}
+}
+
+func TestMustPanic(t *testing.T) {
+	if invalidFilepath == "" {
+		t.Skip("no invalid filepath on this OS")
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			t.Logf("Must(AppendTo(%#q, %q)): panic %v", colonToSep("a:b"),
+				invalidFilepath, r)
+		}
+	}()
+	got := Must(AppendTo(colonToSep("a:b"), invalidFilepath))
+	t.Logf("Must(AppendTo(%#q, %q)) = %v, want panic", colonToSep("a:b"),
+		invalidFilepath, got)
 }

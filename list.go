@@ -51,7 +51,6 @@ package pathlist // import "gopkg.in/pathlist.v0"
 
 import (
 	"os"
-	"path/filepath"
 
 	"gopkg.in/pathlist.v0/internal"
 )
@@ -64,11 +63,6 @@ const ( // replicated from internal to keep messages in godoc
 
 // ListSeparator is the OS-specific path list separator.
 const ListSeparator = os.PathListSeparator
-
-const (
-	listsep  = List(ListSeparator)
-	listsep2 = listsep + listsep
-)
 
 // Error holds a pathlist handling error.
 // Functions in this package return error values implementing this interface.
@@ -108,28 +102,35 @@ func New(filepaths ...string) (List, error) {
 // string, and returns a single empty filepath when passed the sole
 // ListSeparator.
 func Split(list List) []string {
-	if list == listsep {
-		return []string{""}
-	}
-	return filepath.SplitList(string(list))
+	return internal.Filepaths(string(list))
 }
 
-// AppendTo returns list with filepath appended if valid, or returns an Error.
-func AppendTo(list List, filepath string) (List, error) {
-	e, err := internal.NewElem(filepath)
-	if err != nil {
-		return "", err
+// AppendTo returns list with filepaths appended if valid, or returns an Error.
+func AppendTo(list List, filepaths ...string) (List, error) {
+	l := list
+	for _, filepath := range filepaths {
+		e, err := internal.NewElem(filepath)
+		if err != nil {
+			return "", err
+		}
+		l = List(internal.Append(string(l), e))
 	}
-	return List(internal.Append(string(list), string(e))), nil
+	return l, nil
 }
 
-// PrependTo returns list with filepath prepended if valid, or returns an Error.
-func PrependTo(list List, filepath string) (List, error) {
-	e, err := internal.NewElem(filepath)
-	if err != nil {
-		return "", err
+// PrependTo returns list with filepaths prepended if valid, or returns an Error.
+// Filepaths appear in the result in the same order as in the argument list.
+func PrependTo(list List, filepaths ...string) (List, error) {
+	l := list
+	for i := range filepaths {
+		filepath := filepaths[len(filepaths)-i-1]
+		e, err := internal.NewElem(filepath)
+		if err != nil {
+			return "", err
+		}
+		l = List(internal.Prepend(string(l), e))
 	}
-	return List(internal.Prepend(string(list), string(e))), nil
+	return l, nil
 }
 
 // Must takes the results from New, AppendTo or PrependTo and returns the List
