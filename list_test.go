@@ -157,24 +157,24 @@ func TestAppendTo(t *testing.T) {
 }
 
 func testAppendToCase(t *testing.T, tt appendToTest) {
-	appended, aerr := AppendTo(tt.list, tt.filepaths...)
+	appended, aerr := AppendTo(colonToSep(tt.list), tt.filepaths...)
 	switch {
 	case aerr != nil:
 		t.Errorf("AppendTo(%q, %q) = %#q, %v; want equivalent to %q, nil",
 			tt.list, tt.filepaths, appended, aerr, tt.appended)
-	case !equiv(Split(tt.appended), Split(appended)):
+	case !equiv(Split(colonToSep(tt.appended)), Split(appended)):
 		t.Errorf("AppendTo(%q, %q) = %#q, %v; want equivalent to %q, nil",
 			tt.list, tt.filepaths, appended, aerr, tt.appended)
 	default:
 		t.Logf("AppendTo(%q, %q) = %#q, %v",
 			tt.list, tt.filepaths, appended, aerr)
 	}
-	prepended, perr := PrependTo(tt.list, tt.filepaths...)
+	prepended, perr := PrependTo(colonToSep(tt.list), tt.filepaths...)
 	switch {
 	case perr != nil:
 		t.Errorf("PrependTo(%q, %q) = %#q, %v; want equivalent to %q, nil",
 			tt.list, tt.filepaths, prepended, perr, tt.prepended)
-	case !equiv(Split(tt.prepended), Split(prepended)):
+	case !equiv(Split(colonToSep(tt.prepended)), Split(prepended)):
 		t.Errorf("PrependTo(%q, %q) = %#q, %v; want equivalent to %q, nil",
 			tt.list, tt.filepaths, prepended, perr, tt.prepended)
 	default:
