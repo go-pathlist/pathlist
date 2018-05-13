@@ -77,11 +77,13 @@ func doExample() ([]byte, error) {
 
 	// invoke executable
 	bindir := filepath.Join(wkspc, "bin") // should be created by go install
-	newpath, err := pathlist.PrependTo(env.Path(), bindir)
+	oldpath := env.Path()
+	newpath, err := pathlist.PrependTo(oldpath, bindir)
 	if err != nil {
 		return nil, err
 	}
 	env.SetPath(newpath)
+	defer env.SetPath(oldpath)
 	hello := exec.Command("hello")
 	stdouterr, err := hello.CombinedOutput()
 	if err != nil {
